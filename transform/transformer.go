@@ -73,7 +73,31 @@ func (t Transformer) BuildClassTree(nodes []*parse.Node, cfg *Config) *Class {
 		parent.Attributes = append(parent.Attributes, value)
 	}
 
+	t.RemoveDuplicates(tree)
 	return tree
+}
+
+func (t Transformer) RemoveDuplicates(tree *Class) {
+	attrMap := make(map[string]struct{})
+
+	var attributes []*AttributeValue
+	for _, attr := range tree.Attributes {
+		_, exists := attrMap[attr.Key]
+
+		if exists {
+			continue
+		} else {
+			attrMap[attr.Key] = struct{}{}
+		}
+
+		attributes = append(attributes, attr)
+
+		if attr.Class != nil {
+			t.RemoveDuplicates(attr.Class)
+		}
+	}
+
+	tree.Attributes = attributes
 }
 
 func (t Transformer) buildTemplate(tree *Class, addDecorators bool) string {
@@ -113,7 +137,7 @@ func (t Transformer) buildTemplate(tree *Class, addDecorators bool) string {
 		if addDecorators {
 			decorators := generateDecorators(v)
 			for _, d := range decorators {
-				str := fmt.Sprintf("\t %s \n", d)
+				str := fmt.Sprintf("\t%s\n", d)
 				s.WriteString(str)
 			}
 		}
@@ -160,21 +184,22 @@ func (t Transformer) WriteTemplate(tmpl string, output string) error {
 
 func generateDecorators(v *AttributeValue) []string {
 	// Generator for class decorators.
-	tGen := func(decs []string, v *AttributeValue) {
+	tGen := func(decs []string, v *AttributeValue) []string {
 		decs = append(decs, fmt.Sprintf("@Type(() => %s)", v.Class.Name))
 		decs = append(decs, "@ValidateNested({ each: true })")
+		return decs
 	}
 
-	var decorators []string
+	decorators := []string{"@IsDefined()"}
 
 	switch v.Type {
 	case parse.Object:
-		tGen(decorators, v)
+		decorators = tGen(decorators, v)
 		break
 	case parse.Array:
 		decorators = append(decorators, "@IsArray()")
 		if v.Class != nil {
-			tGen(decorators, v)
+			decorators = tGen(decorators, v)
 		}
 		break
 	case parse.Bool:
