@@ -33,9 +33,7 @@ type AttributeValue struct {
 func (t Transformer) Transform(nodes []*parse.Node, cfg *Config) error {
 	tree := t.BuildClassTree(nodes, cfg)
 	tmpl := t.buildTemplate(tree, cfg.Decorators)
-	_, err := io.WriteString(os.Stdout, tmpl)
-
-	return err
+	return t.WriteTemplate(tmpl, cfg.Output)
 }
 
 func (t Transformer) BuildClassTree(nodes []*parse.Node, cfg *Config) *Class {
@@ -141,6 +139,23 @@ func (t Transformer) buildTemplate(tree *Class, addDecorators bool) string {
 	}
 
 	return s.String()
+}
+
+func (t Transformer) WriteTemplate(tmpl string, output string) error {
+	var w io.Writer = os.Stdout
+
+	if output != "" {
+		f, err := os.Create(output)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		w = f
+	}
+
+	_, err := io.WriteString(w, tmpl)
+	return err
 }
 
 func generateDecorators(v *AttributeValue) []string {
