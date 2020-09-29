@@ -20,7 +20,7 @@ Take some JSON, such as this example from an HTTP response
 {
   "data": [{
 	  "status": "success",
-	  "some-flag": true,
+	  "flag": true,
 	  "array": [{
 		  "ofData": "Also supports any level of depth!"
 	  }]
@@ -56,7 +56,7 @@ export class Data {
 
 	@IsDefined()
 	@IsBoolean()
-	public some-flag!: boolean;
+	public flag!: boolean;
 
 	@IsDefined()
 	@IsArray()
