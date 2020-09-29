@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"log"
-	"os"
 
 	"github.com/sno6/json2ts/parse"
 	"github.com/sno6/json2ts/transform"
@@ -15,7 +14,9 @@ func Execute() {
 		Use:   "github.com/sno6/json2ts",
 		Short: "Transform JSON into typescript classes",
 		Run: func(cmd *cobra.Command, args []string) {
-			nodes, err := (parse.Parser{}).Parse(os.Stdin)
+			input := cmd.Flag("input").Value.String()
+
+			nodes, err := (parse.Parser{}).Parse(input)
 			if err != nil {
 				log.Fatal(err)
 			}

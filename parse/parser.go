@@ -1,8 +1,11 @@
 package parse
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 	"text/scanner"
@@ -30,9 +33,14 @@ const (
 	Null
 )
 
-func (p Parser) Parse(r io.Reader) ([]*Node, error) {
+func (p Parser) Parse(input string) ([]*Node, error) {
+	r, err := p.readInput(input)
+	if err != nil {
+		return nil, err
+	}
+
 	var s scanner.Scanner
-	s.Init(os.Stdin)
+	s.Init(r)
 
 	var (
 		objDepth int
@@ -122,4 +130,36 @@ func (t Type) String() string {
 	}
 
 	panic("unknown node type")
+}
+
+func (p Parser) readInput(input string) (io.Reader, error) {
+	var r io.Reader
+
+	if input == "" {
+		r = os.Stdin
+	} else {
+		f, err := os.Open(input)
+		if err != nil {
+			return nil, err
+		}
+		defer f.Close()
+
+		r = f
+	}
+
+	return p.indentedJSONReader(r)
+}
+
+func (p Parser) indentedJSONReader(r io.Reader) (io.Reader, error) {
+	j, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
+	b := &bytes.Buffer{}
+	if err := json.Indent(b, j, "", "\t"); err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
