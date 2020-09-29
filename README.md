@@ -10,7 +10,7 @@ If you have go already installed you can simply run
 go get github.com/sno6/json2ts
 ```
 
-If you prefer a binary, you can also find those in the [releases section](https://www.github.com/sno6/json2ts/releases)
+If you prefer a binary, you can also find those in the [releases section](https://github.com/sno6/json2ts/releases/tag/v1.0)
 
 ## Example
 
