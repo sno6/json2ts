@@ -10,7 +10,7 @@ If you have go already installed you can simply run
 go get github.com/sno6/json2ts
 ```
 
-If you prefer a binary, you can also find those in the [releases section](https://www.github.com/sno6/json2ts/releases):
+If you prefer a binary, you can also find those in the [releases section](https://www.github.com/sno6/json2ts/releases)
 
 ## Example
 
@@ -19,40 +19,26 @@ Take some JSON, such as this example from an HTTP response
 ```json
 {
   "data": [{
-    "type": "articles",
-    "id": "1",
-    "attributes": {
-      "title": "JSON:API paints my bikeshed!",
-      "body": "The shortest article. Ever.",
-    },
-    "relationships": {
-      "author": {
-        "data": {"id": "42", "type": "people"}
-      }
-    }
-  }],
-  "included": [
-    {
-      "type": "people",
-      "id": "42",
-      "included_attributes": {
-        "name": "John",
-        "age": 80,
-        "gender": "male"
-      }
-    }
-  ]
+	  "status": "success",
+	  "some-flag": true,
+	  "array": [{
+		  "ofData": "Also supports any level of depth!"
+	  }]
+  }]
 }
-
 ```
 
-Copy the JSON and run the following:
+Pass the JSON through json2ts
 
 ```bash
->>> pbpaste | json2ts
+# Either from the clipboard (OSX)
+>>> pbpaste | json2ts -d
+
+# Or from a file
+>>> json2ts -i my_file.json -d
 ```
 
-Which will print the following Typescript code
+and voila, your Typescript generated code
 
 ```typescript
 export class BaseClass {
@@ -61,95 +47,28 @@ export class BaseClass {
 	@Type(() => Data)
 	@ValidateNested({ each: true })
 	public data!: Data[];
+}
+
+export class Data {
+	@IsDefined()
+	@IsString()
+	public status!: string;
+
+	@IsDefined()
+	@IsBoolean()
+	public some-flag!: boolean;
 
 	@IsDefined()
 	@IsArray()
-	@Type(() => Included)
+	@Type(() => Array)
 	@ValidateNested({ each: true })
-	public included!: Included[];
+	public array!: Array[];
 }
 
-export class Data {
+export class Array {
 	@IsDefined()
 	@IsString()
-	public type!: string;
-
-	@IsDefined()
-	@IsString()
-	public id!: string;
-
-	@IsDefined()
-	@Type(() => Attributes)
-	@ValidateNested({ each: true })
-	public attributes!: Attributes;
-
-	@IsDefined()
-	@Type(() => Relationships)
-	@ValidateNested({ each: true })
-	public relationships!: Relationships;
-}
-
-export class Attributes {
-	@IsDefined()
-	@IsString()
-	public title!: string;
-
-	@IsDefined()
-	@IsString()
-	public body!: string;
-}
-
-export class Relationships {
-	@IsDefined()
-	@Type(() => Author)
-	@ValidateNested({ each: true })
-	public author!: Author;
-}
-
-export class Author {
-	@IsDefined()
-	@Type(() => Data)
-	@ValidateNested({ each: true })
-	public data!: Data;
-}
-
-export class Data {
-	@IsDefined()
-	@IsString()
-	public id!: string;
-
-	@IsDefined()
-	@IsString()
-	public type!: string;
-}
-
-export class Included {
-	@IsDefined()
-	@IsString()
-	public type!: string;
-
-	@IsDefined()
-	@IsString()
-	public id!: string;
-
-	@IsDefined()
-	@Type(() => IncludedAttributes)
-	@ValidateNested({ each: true })
-	public included_attributes!: IncludedAttributes;
-}
-
-export class IncludedAttributes {
-	@IsDefined()
-	@IsString()
-	public name!: string;
-
-	@IsDefined()
-	@IsNumber()
-	public age!: number;
-
-	@IsDefined()
-	@IsString()
-	public gender!: string;
+	public ofData!: string;
 }
 ```
 
