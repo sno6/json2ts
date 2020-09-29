@@ -1,17 +1,18 @@
 package cmd
 
 import (
-	"json2ts/parse"
-	"json2ts/transform"
 	"log"
 	"os"
+
+	"github.com/sno6/json2ts/parse"
+	"github.com/sno6/json2ts/transform"
 
 	"github.com/spf13/cobra"
 )
 
 func Execute() {
 	root := &cobra.Command{
-		Use:   "json2ts",
+		Use:   "github.com/sno6/json2ts",
 		Short: "Transform JSON into typescript classes",
 		Run: func(cmd *cobra.Command, args []string) {
 			nodes, err := (parse.Parser{}).Parse(os.Stdin)

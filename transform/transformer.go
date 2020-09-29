@@ -3,9 +3,10 @@ package transform
 import (
 	"fmt"
 	"io"
-	"json2ts/parse"
 	"os"
 	"strings"
+
+	"github.com/sno6/json2ts/parse"
 )
 
 const DefaultBaseClassName = "BaseClass"
